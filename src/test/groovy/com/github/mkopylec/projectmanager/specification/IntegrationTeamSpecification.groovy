@@ -7,7 +7,7 @@ import spock.lang.Unroll
 import static org.springframework.http.HttpStatus.CREATED
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 
-class TeamSpecification extends BasicSpecification {
+class IntegrationTeamSpecification extends BasicSpecification {
 
     def "Should create a new team"() {
         given:
