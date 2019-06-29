@@ -1,6 +1,6 @@
-package com.github.mkopylec.projectmanager.specification
+package com.github.mkopylec.projectmanager.specification.integration
 
-import com.github.mkopylec.projectmanager.BasicSpecification
+
 import com.github.mkopylec.projectmanager.application.dto.NewTeam
 import spock.lang.Unroll
 

@@ -1,4 +1,4 @@
-package com.github.mkopylec.projectmanager
+package com.github.mkopylec.projectmanager.specification.integration
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import org.junit.Rule
@@ -12,20 +12,11 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import spock.lang.Specification
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import static com.github.tomakehurst.wiremock.client.WireMock.containing
-import static com.github.tomakehurst.wiremock.client.WireMock.post
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import static com.github.tomakehurst.wiremock.client.WireMock.verify
+import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static java.util.concurrent.TimeUnit.SECONDS
 import static org.awaitility.Awaitility.await
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import static org.springframework.http.HttpMethod.GET
-import static org.springframework.http.HttpMethod.PATCH
-import static org.springframework.http.HttpMethod.POST
-import static org.springframework.http.HttpMethod.PUT
+import static org.springframework.http.HttpMethod.*
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 abstract class BasicSpecification extends Specification {
