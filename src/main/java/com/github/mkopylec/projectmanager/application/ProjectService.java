@@ -1,5 +1,6 @@
 package com.github.mkopylec.projectmanager.application;
 
+import com.github.mkopylec.projectmanager.application.dto.ExistingProject;
 import com.github.mkopylec.projectmanager.application.dto.ExistingProjectDraft;
 import com.github.mkopylec.projectmanager.application.dto.NewProject;
 import com.github.mkopylec.projectmanager.application.dto.NewProjectDraft;
@@ -11,8 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.github.mkopylec.projectmanager.application.utils.DtoMapper.mapToExistingProject;
 import static com.github.mkopylec.projectmanager.application.utils.DtoMapper.mapToExistingProjectDrafts;
 import static com.github.mkopylec.projectmanager.application.utils.DtoMapper.mapToFeatures;
+import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.NONEXISTENT_PROJECT;
+import static com.github.mkopylec.projectmanager.domain.exceptions.PreCondition.when;
 
 @Service
 public class ProjectService {
@@ -39,5 +43,12 @@ public class ProjectService {
     public List<ExistingProjectDraft> getProjects() {
         List<Project> projects = projectRepository.findAll();
         return mapToExistingProjectDrafts(projects);
+    }
+
+    public ExistingProject getProject(String projectIdentifier) {
+        Project project = projectRepository.findByIdentifier(projectIdentifier);
+        when(project == null)
+                .thenMissingEntity(NONEXISTENT_PROJECT, "Error getting '" + projectIdentifier + "' project");
+        return mapToExistingProject(project);
     }
 }

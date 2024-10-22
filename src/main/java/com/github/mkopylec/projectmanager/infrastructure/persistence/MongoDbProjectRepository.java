@@ -19,6 +19,11 @@ class MongoDbProjectRepository implements ProjectRepository {
     }
 
     @Override
+    public Project findByIdentifier(String identifier) {
+        return mongo.findById(identifier, Project.class, PROJECTS_COLLECTION);
+    }
+
+    @Override
     public List<Project> findAll() {
         return mongo.findAll(Project.class, PROJECTS_COLLECTION);
     }

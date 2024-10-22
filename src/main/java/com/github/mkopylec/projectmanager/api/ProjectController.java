@@ -49,6 +49,6 @@ class ProjectController {
     @ResponseStatus(OK)
     @GetMapping("/{projectIdentifier}")
     public ExistingProject getProject(@PathVariable String projectIdentifier) {
-        return null;
+        return projectService.getProject(projectIdentifier);
     }
 }
