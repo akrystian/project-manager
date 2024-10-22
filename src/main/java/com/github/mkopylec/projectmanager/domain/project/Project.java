@@ -42,6 +42,14 @@ public class Project {
         this.features = features;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     private void validateFeatures(List<Feature> features, String message) {
         features.forEach(feature -> validateFeature(feature, message));
     }

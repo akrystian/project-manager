@@ -41,6 +41,6 @@ class ProjectController {
     @ResponseStatus(OK)
     @GetMapping
     public List<ExistingProjectDraft> getProjects() {
-        return null;
+        return projectService.getProjects();
     }
 }

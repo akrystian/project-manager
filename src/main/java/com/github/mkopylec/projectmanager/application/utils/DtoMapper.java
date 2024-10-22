@@ -1,8 +1,10 @@
 package com.github.mkopylec.projectmanager.application.utils;
 
+import com.github.mkopylec.projectmanager.application.dto.ExistingProjectDraft;
 import com.github.mkopylec.projectmanager.application.dto.ExistingTeam;
 import com.github.mkopylec.projectmanager.application.dto.NewFeature;
 import com.github.mkopylec.projectmanager.application.dto.TeamMember;
+import com.github.mkopylec.projectmanager.domain.project.Project;
 import com.github.mkopylec.projectmanager.domain.team.Team;
 import com.github.mkopylec.projectmanager.domain.values.Employee;
 import com.github.mkopylec.projectmanager.domain.values.Feature;
@@ -31,6 +33,12 @@ public class DtoMapper {
     public static List<Feature> mapToFeatures(List<NewFeature> newFeatures) {
         return emptyIfNull(newFeatures).stream()
                 .map(DtoMapper::mapToFeature)
+                .collect(toList());
+    }
+
+    public static List<ExistingProjectDraft> mapToExistingProjectDrafts(List<Project> projects) {
+        return emptyIfNull(projects).stream()
+                .map(DtoMapper::mapToExistingProjectDraft)
                 .collect(toList());
     }
 
@@ -82,6 +90,13 @@ public class DtoMapper {
         } catch (IllegalArgumentException e) {
             return Requirement.INVALID;
         }
+    }
+
+    private static ExistingProjectDraft mapToExistingProjectDraft(Project project) {
+        ExistingProjectDraft existingProjectDraft = new ExistingProjectDraft();
+        existingProjectDraft.setIdentifier(project.getIdentifier());
+        existingProjectDraft.setName(project.getName());
+        return existingProjectDraft;
     }
 
     private DtoMapper() {

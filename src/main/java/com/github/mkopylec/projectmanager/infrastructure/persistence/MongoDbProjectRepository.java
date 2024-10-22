@@ -5,6 +5,8 @@ import com.github.mkopylec.projectmanager.domain.project.ProjectRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 class MongoDbProjectRepository implements ProjectRepository {
 
@@ -14,6 +16,11 @@ class MongoDbProjectRepository implements ProjectRepository {
 
     MongoDbProjectRepository(MongoTemplate mongo) {
         this.mongo = mongo;
+    }
+
+    @Override
+    public List<Project> findAll() {
+        return mongo.findAll(Project.class, PROJECTS_COLLECTION);
     }
 
     @Override
