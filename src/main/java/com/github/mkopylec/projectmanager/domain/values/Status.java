@@ -10,4 +10,12 @@ public enum Status {
     public boolean isAtLeastStarted() {
         return this != TO_DO;
     }
+
+    public boolean isNotStarted() {
+        return this == TO_DO;
+    }
+
+    public boolean isDone() {
+        return this == DONE;
+    }
 }

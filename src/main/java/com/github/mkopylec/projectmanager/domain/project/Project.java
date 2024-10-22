@@ -15,14 +15,18 @@ import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.EMP
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.EMPTY_PROJECT_NAME;
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.INVALID_FEATURE_REQUIREMENT;
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.INVALID_FEATURE_STATUS;
+import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.PROJECT_ALREADY_ENDED;
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.PROJECT_ALREADY_STARTED;
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.UNASSIGNED_TEAM;
+import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.UNSTARTED_PROJECT;
 import static com.github.mkopylec.projectmanager.domain.exceptions.PreCondition.when;
+import static com.github.mkopylec.projectmanager.domain.values.Status.DONE;
 import static com.github.mkopylec.projectmanager.domain.values.Status.IN_PROGRESS;
 import static com.github.mkopylec.projectmanager.domain.values.Status.TO_DO;
 import static java.util.Collections.unmodifiableList;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class Project {
 
@@ -69,6 +73,10 @@ public class Project {
         return assignedTeam;
     }
 
+    public boolean hasAssignedTeam() {
+        return isNotBlank(assignedTeam);
+    }
+
     public void assignTeam(Team team) {
         assignedTeam = team == null ? null : team.getName();
     }
@@ -88,6 +96,14 @@ public class Project {
         requireAssignedTeam(message);
         requireUnstarted(message);
         status = IN_PROGRESS;
+    }
+
+    public EndedProject end(FeatureChecker featureChecker) {
+        String message = "Error starting '" + identifier + "' project";
+        requireStarted(message);
+        featureChecker.checkFeatures(features, message);
+        status = DONE;
+        return new EndedProject(identifier);
     }
 
     private void validateName(String name, String message) {
@@ -127,6 +143,13 @@ public class Project {
     private void requireUnstarted(String message) {
         when(status.isAtLeastStarted())
                 .thenInvalidEntity(PROJECT_ALREADY_STARTED, message);
+    }
+
+    private void requireStarted(String message) {
+        when(status.isNotStarted())
+                .thenInvalidEntity(UNSTARTED_PROJECT, message);
+        when(status.isDone())
+                .thenInvalidEntity(PROJECT_ALREADY_ENDED, message);
     }
 
     private Project() {

@@ -44,6 +44,10 @@ public class Team {
         currentlyImplementedProjects++;
     }
 
+    public void removeCurrentlyImplementedProject() {
+        currentlyImplementedProjects--;
+    }
+
     public List<Employee> getMembers() {
         return unmodifiableList(members);
     }

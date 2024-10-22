@@ -39,6 +39,14 @@ public class Feature {
         return hasStatus() && status == Status.INVALID;
     }
 
+    public boolean isUndone() {
+        return !status.isDone();
+    }
+
+    public boolean isNecessaryAndUndone() {
+        return !status.isDone() && requirement.isNecessary();
+    }
+
     public Requirement getRequirement() {
         return requirement;
     }
