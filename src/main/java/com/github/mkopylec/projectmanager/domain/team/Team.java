@@ -13,9 +13,12 @@ import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.EMP
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.EMPTY_TEAM_NAME;
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.INVALID_MEMBER_JOB_POSITION;
 import static com.github.mkopylec.projectmanager.domain.exceptions.PreCondition.when;
+import static java.util.Collections.unmodifiableList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Team {
+
+    private static final int BUSY_TEAM_THRESHOLD = 3;
 
     @Id
     private String name;
@@ -33,9 +36,21 @@ public class Team {
         return name;
     }
 
+    public int getCurrentlyImplementedProjects() {
+        return currentlyImplementedProjects;
+    }
+
+    public List<Employee> getMembers() {
+        return unmodifiableList(members);
+    }
+
     public void addMember(Employee member) {
         validateMember(member, "Error adding member to '" + name + "' team");
         members.add(member);
+    }
+
+    public boolean isBusy() {
+        return currentlyImplementedProjects > BUSY_TEAM_THRESHOLD;
     }
 
     private void validateName(String name, String message) {

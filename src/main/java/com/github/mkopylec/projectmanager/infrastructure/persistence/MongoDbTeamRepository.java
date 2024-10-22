@@ -5,6 +5,8 @@ import com.github.mkopylec.projectmanager.domain.team.TeamRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -27,6 +29,11 @@ class MongoDbTeamRepository implements TeamRepository {
     @Override
     public Team findByName(String name) {
         return mongo.findById(name, Team.class, TEAMS_COLLECTION);
+    }
+
+    @Override
+    public List<Team> findAll() {
+        return mongo.findAll(Team.class, TEAMS_COLLECTION);
     }
 
     @Override
