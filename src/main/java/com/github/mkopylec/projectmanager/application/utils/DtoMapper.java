@@ -1,10 +1,13 @@
 package com.github.mkopylec.projectmanager.application.utils;
 
 import com.github.mkopylec.projectmanager.application.dto.ExistingTeam;
+import com.github.mkopylec.projectmanager.application.dto.NewFeature;
 import com.github.mkopylec.projectmanager.application.dto.TeamMember;
 import com.github.mkopylec.projectmanager.domain.team.Team;
 import com.github.mkopylec.projectmanager.domain.values.Employee;
+import com.github.mkopylec.projectmanager.domain.values.Feature;
 import com.github.mkopylec.projectmanager.domain.values.JobPosition;
+import com.github.mkopylec.projectmanager.domain.values.Requirement;
 
 import java.util.List;
 
@@ -22,6 +25,12 @@ public class DtoMapper {
     public static List<ExistingTeam> mapToExistingTeams(List<Team> teams) {
         return emptyIfNull(teams).stream()
                 .map(DtoMapper::mapToExistingTeam)
+                .collect(toList());
+    }
+
+    public static List<Feature> mapToFeatures(List<NewFeature> newFeatures) {
+        return emptyIfNull(newFeatures).stream()
+                .map(DtoMapper::mapToFeature)
                 .collect(toList());
     }
 
@@ -45,6 +54,14 @@ public class DtoMapper {
         return member;
     }
 
+    private static Feature mapToFeature(NewFeature newFeature) {
+        if (newFeature == null) {
+            return null;
+        }
+        Requirement requirement = mapToRequirement(newFeature.getRequirement());
+        return new Feature(newFeature.getName(), requirement);
+    }
+
     private static JobPosition mapToJobPosition(String jobPosition) {
         if (isBlank(jobPosition)) {
             return null;
@@ -53,6 +70,17 @@ public class DtoMapper {
             return JobPosition.valueOf(jobPosition);
         } catch (IllegalArgumentException e) {
             return JobPosition.INVALID;
+        }
+    }
+
+    private static Requirement mapToRequirement(String requirement) {
+        if (isBlank(requirement)) {
+            return null;
+        }
+        try {
+            return Requirement.valueOf(requirement);
+        } catch (IllegalArgumentException e) {
+            return Requirement.INVALID;
         }
     }
 
