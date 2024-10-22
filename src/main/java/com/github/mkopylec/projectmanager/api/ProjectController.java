@@ -7,6 +7,7 @@ import com.github.mkopylec.projectmanager.application.dto.NewProject;
 import com.github.mkopylec.projectmanager.application.dto.NewProjectDraft;
 import com.github.mkopylec.projectmanager.application.dto.UpdatedProject;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -59,5 +60,11 @@ class ProjectController {
     @PutMapping("/{projectIdentifier}")
     public void updateProject(@PathVariable String projectIdentifier, @RequestBody UpdatedProject updatedProject) {
         projectService.updateProject(projectIdentifier, updatedProject);
+    }
+
+    @ResponseStatus(NO_CONTENT)
+    @PatchMapping("/{projectIdentifier}/started")
+    public void startProject(@PathVariable String projectIdentifier) {
+
     }
 }
