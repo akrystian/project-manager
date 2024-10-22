@@ -4,9 +4,14 @@ import com.github.mkopylec.projectmanager.application.dto.ExistingProject;
 import com.github.mkopylec.projectmanager.application.dto.ExistingProjectDraft;
 import com.github.mkopylec.projectmanager.application.dto.NewProject;
 import com.github.mkopylec.projectmanager.application.dto.NewProjectDraft;
+import com.github.mkopylec.projectmanager.application.dto.UpdatedProject;
+import com.github.mkopylec.projectmanager.application.utils.DtoMapper;
 import com.github.mkopylec.projectmanager.domain.project.Project;
 import com.github.mkopylec.projectmanager.domain.project.ProjectFactory;
 import com.github.mkopylec.projectmanager.domain.project.ProjectRepository;
+import com.github.mkopylec.projectmanager.domain.services.ProjectTeamAssigner;
+import com.github.mkopylec.projectmanager.domain.team.Team;
+import com.github.mkopylec.projectmanager.domain.team.TeamRepository;
 import com.github.mkopylec.projectmanager.domain.values.Feature;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +28,14 @@ public class ProjectService {
 
     private ProjectFactory projectFactory;
     private ProjectRepository projectRepository;
+    private TeamRepository teamRepository;
+    private ProjectTeamAssigner projectTeamAssigner;
 
-    public ProjectService(ProjectFactory projectFactory, ProjectRepository projectRepository) {
+    public ProjectService(ProjectFactory projectFactory, ProjectRepository projectRepository, TeamRepository teamRepository, ProjectTeamAssigner projectTeamAssigner) {
         this.projectFactory = projectFactory;
         this.projectRepository = projectRepository;
+        this.teamRepository = teamRepository;
+        this.projectTeamAssigner = projectTeamAssigner;
     }
 
     public void createProject(NewProjectDraft newProjectDraft) {
@@ -35,7 +44,7 @@ public class ProjectService {
     }
 
     public void createProject(NewProject newProject) {
-        List<Feature> features = mapToFeatures(newProject.getFeatures());
+        List<Feature> features = DtoMapper.mapNewToFeatures(newProject.getFeatures());
         Project project = projectFactory.createFullProject(newProject.getName(), features);
         projectRepository.save(project);
     }
@@ -50,5 +59,18 @@ public class ProjectService {
         when(project == null)
                 .thenMissingEntity(NONEXISTENT_PROJECT, "Error getting '" + projectIdentifier + "' project");
         return mapToExistingProject(project);
+    }
+
+    public void updateProject(String projectIdentifier, UpdatedProject updatedProject) {
+        Project project = projectRepository.findByIdentifier(projectIdentifier);
+        when(project == null)
+                .thenMissingEntity(NONEXISTENT_PROJECT, "Error updating '" + projectIdentifier + "' project");
+        List<Feature> features = mapToFeatures(updatedProject.getFeatures());
+        project.rename(updatedProject.getName());
+        project.updateFeatures(features);
+        Team team = teamRepository.findByName(updatedProject.getTeam());
+        projectTeamAssigner.assignTeamToProject(team, project);
+        projectRepository.save(project);
+        teamRepository.save(team);
     }
 }

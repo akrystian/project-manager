@@ -1,6 +1,5 @@
 package com.github.mkopylec.projectmanager.domain.values;
 
-import static com.github.mkopylec.projectmanager.domain.values.Requirement.INVALID;
 import static com.github.mkopylec.projectmanager.domain.values.Status.TO_DO;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -11,9 +10,13 @@ public class Feature {
     private Requirement requirement;
 
     public Feature(String name, Requirement requirement) {
+        this(name, TO_DO, requirement);
+    }
+
+    public Feature(String name, Status status, Requirement requirement) {
         this.name = name;
+        this.status = status;
         this.requirement = requirement;
-        status = TO_DO;
     }
 
     public String getName() {
@@ -32,6 +35,10 @@ public class Feature {
         return !hasStatus();
     }
 
+    public boolean hasInvalidStatus() {
+        return hasStatus() && status == Status.INVALID;
+    }
+
     public Requirement getRequirement() {
         return requirement;
     }
@@ -41,7 +48,7 @@ public class Feature {
     }
 
     public boolean hasInvalidRequirement() {
-        return hasRequirement() && requirement == INVALID;
+        return hasRequirement() && requirement == Requirement.INVALID;
     }
 
     private boolean hasStatus() {

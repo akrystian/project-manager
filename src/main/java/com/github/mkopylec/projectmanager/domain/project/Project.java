@@ -1,5 +1,6 @@
 package com.github.mkopylec.projectmanager.domain.project;
 
+import com.github.mkopylec.projectmanager.domain.team.Team;
 import com.github.mkopylec.projectmanager.domain.values.Feature;
 import com.github.mkopylec.projectmanager.domain.values.Status;
 import org.springframework.data.annotation.Id;
@@ -13,6 +14,7 @@ import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.EMP
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.EMPTY_PROJECT_IDENTIFIER;
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.EMPTY_PROJECT_NAME;
 import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.INVALID_FEATURE_REQUIREMENT;
+import static com.github.mkopylec.projectmanager.domain.exceptions.ErrorCode.INVALID_FEATURE_STATUS;
 import static com.github.mkopylec.projectmanager.domain.exceptions.PreCondition.when;
 import static com.github.mkopylec.projectmanager.domain.values.Status.TO_DO;
 import static java.util.Collections.unmodifiableList;
@@ -51,6 +53,11 @@ public class Project {
         return name;
     }
 
+    public void rename(String name) {
+        validateName(name, "Error renaming '" + identifier + "' project");
+        this.name = name;
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -59,8 +66,23 @@ public class Project {
         return assignedTeam;
     }
 
+    public void assignTeam(Team team) {
+        assignedTeam = team == null ? null : team.getName();
+    }
+
     public List<Feature> getFeatures() {
         return unmodifiableList(features);
+    }
+
+    public void updateFeatures(List<Feature> features) {
+        features = emptyIfNull(features);
+        validateFeatures(features, "Error updating '" + identifier + "' project features");
+        this.features = features;
+    }
+
+    private void validateName(String name, String message) {
+        when(isBlank(name))
+                .thenInvalidEntity(EMPTY_PROJECT_NAME, message);
     }
 
     private void validateFeatures(List<Feature> features, String message) {
@@ -74,6 +96,8 @@ public class Project {
                 .thenInvalidEntity(EMPTY_FEATURE_NAME, message);
         when(feature.hasNoStatus())
                 .thenInvalidEntity(EMPTY_FEATURE_STATUS, message);
+        when(feature.hasInvalidStatus())
+                .thenInvalidEntity(INVALID_FEATURE_STATUS, message);
         when(feature.hasNoRequirement())
                 .thenInvalidEntity(EMPTY_FEATURE_REQUIREMENT, message);
         when(feature.hasInvalidRequirement())
@@ -83,11 +107,6 @@ public class Project {
     private void validateIdentifier(String identifier, String message) {
         when(isBlank(identifier))
                 .thenInvalidEntity(EMPTY_PROJECT_IDENTIFIER, message);
-    }
-
-    private void validateName(String name, String message) {
-        when(isBlank(name))
-                .thenInvalidEntity(EMPTY_PROJECT_NAME, message);
     }
 
     private Project() {

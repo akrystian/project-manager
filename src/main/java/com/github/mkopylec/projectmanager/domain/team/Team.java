@@ -40,6 +40,10 @@ public class Team {
         return currentlyImplementedProjects;
     }
 
+    public void addCurrentlyImplementedProject() {
+        currentlyImplementedProjects++;
+    }
+
     public List<Employee> getMembers() {
         return unmodifiableList(members);
     }

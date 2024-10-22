@@ -12,6 +12,7 @@ import com.github.mkopylec.projectmanager.domain.values.Employee;
 import com.github.mkopylec.projectmanager.domain.values.Feature;
 import com.github.mkopylec.projectmanager.domain.values.JobPosition;
 import com.github.mkopylec.projectmanager.domain.values.Requirement;
+import com.github.mkopylec.projectmanager.domain.values.Status;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class DtoMapper {
                 .collect(toList());
     }
 
-    public static List<Feature> mapToFeatures(List<NewFeature> newFeatures) {
+    public static List<Feature> mapNewToFeatures(List<NewFeature> newFeatures) {
         return emptyIfNull(newFeatures).stream()
                 .map(DtoMapper::mapToFeature)
                 .collect(toList());
@@ -55,6 +56,12 @@ public class DtoMapper {
                 .collect(toList())
         );
         return existingProject;
+    }
+
+    public static List<Feature> mapToFeatures(List<ProjectFeature> projectFeatures) {
+        return emptyIfNull(projectFeatures).stream()
+                .map(DtoMapper::mapToFeature)
+                .collect(toList());
     }
 
     private static ExistingTeam mapToExistingTeam(Team team) {
@@ -107,6 +114,17 @@ public class DtoMapper {
         }
     }
 
+    private static Status mapToStatus(String status) {
+        if (isBlank(status)) {
+            return null;
+        }
+        try {
+            return Status.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            return Status.INVALID;
+        }
+    }
+
     private static ExistingProjectDraft mapToExistingProjectDraft(Project project) {
         ExistingProjectDraft existingProjectDraft = new ExistingProjectDraft();
         existingProjectDraft.setIdentifier(project.getIdentifier());
@@ -120,6 +138,15 @@ public class DtoMapper {
         projectFeature.setStatus(feature.getStatus().name());
         projectFeature.setRequirement(feature.getRequirement().name());
         return projectFeature;
+    }
+
+    private static Feature mapToFeature(ProjectFeature projectFeature) {
+        if (projectFeature == null) {
+            return null;
+        }
+        Status status = mapToStatus(projectFeature.getStatus());
+        Requirement requirement = mapToRequirement(projectFeature.getRequirement());
+        return new Feature(projectFeature.getName(), status, requirement);
     }
 
     private DtoMapper() {
