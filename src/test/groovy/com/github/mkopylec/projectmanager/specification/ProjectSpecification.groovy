@@ -1,6 +1,7 @@
 package com.github.mkopylec.projectmanager.specification
 
 import com.github.mkopylec.projectmanager.BasicSpecification
+import com.github.mkopylec.projectmanager.application.dto.ExistingProject
 import com.github.mkopylec.projectmanager.application.dto.ExistingProjectDraft
 import com.github.mkopylec.projectmanager.application.dto.NewFeature
 import com.github.mkopylec.projectmanager.application.dto.NewProject
@@ -9,6 +10,7 @@ import org.springframework.core.ParameterizedTypeReference
 import spock.lang.Unroll
 
 import static org.springframework.http.HttpStatus.CREATED
+import static org.springframework.http.HttpStatus.NOT_FOUND
 import static org.springframework.http.HttpStatus.OK
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 
@@ -34,6 +36,23 @@ class ProjectSpecification extends BasicSpecification {
         with(response.body[0]) {
             identifier != null
             name == 'Project 1'
+        }
+
+        and:
+        def projectIdentifier = response.body[0].identifier
+
+        when:
+        response = get("/projects/$projectIdentifier", ExistingProject)
+
+        then:
+        response.statusCode == OK
+        response.body != null
+        with(response.body) {
+            identifier == projectIdentifier
+            name == 'Project 1'
+            status == 'TO_DO'
+            team == null
+            features == []
         }
     }
 
@@ -75,6 +94,27 @@ class ProjectSpecification extends BasicSpecification {
         with(response.body[0]) {
             identifier != null
             name == 'Project 1'
+        }
+
+        and:
+        def projectIdentifier = response.body[0].identifier
+
+        when:
+        response = get("/projects/$projectIdentifier", ExistingProject)
+
+        then:
+        response.statusCode == OK
+        response.body != null
+        with(response.body) {
+            identifier == projectIdentifier
+            name == 'Project 1'
+            status == 'TO_DO'
+            team == null
+            features != null
+            features.size() == 1
+            features[0].name == 'Feature 1'
+            features[0].status == 'TO_DO'
+            features[0].requirement == requirement
         }
 
         where:
@@ -142,5 +182,14 @@ class ProjectSpecification extends BasicSpecification {
         then:
         response.statusCode == OK
         response.body == []
+    }
+
+    def "Should not browse project if it does not exist"() {
+        when:
+        def response = get('/projects/abc', Map)
+
+        then:
+        response.statusCode == NOT_FOUND
+        response.body.code == 'NONEXISTENT_PROJECT'
     }
 }
