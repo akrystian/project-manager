@@ -5,6 +5,7 @@ import com.github.mkopylec.projectmanager.application.dto.ExistingProject;
 import com.github.mkopylec.projectmanager.application.dto.ExistingProjectDraft;
 import com.github.mkopylec.projectmanager.application.dto.NewProject;
 import com.github.mkopylec.projectmanager.application.dto.NewProjectDraft;
+import com.github.mkopylec.projectmanager.application.dto.ProjectEndingCondition;
 import com.github.mkopylec.projectmanager.application.dto.UpdatedProject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -66,5 +67,11 @@ class ProjectController {
     @PatchMapping("/{projectIdentifier}/started")
     public void startProject(@PathVariable String projectIdentifier) {
         projectService.startProject(projectIdentifier);
+    }
+
+    @ResponseStatus(NO_CONTENT)
+    @PatchMapping("/{projectIdentifier}/ended")
+    public void endProject(@PathVariable String projectIdentifier, @RequestBody ProjectEndingCondition endingCondition) {
+
     }
 }
