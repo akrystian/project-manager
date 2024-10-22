@@ -25,6 +25,11 @@ class MongoDbTeamRepository implements TeamRepository {
     }
 
     @Override
+    public Team findByName(String name) {
+        return mongo.findById(name, Team.class, TEAMS_COLLECTION);
+    }
+
+    @Override
     public void save(Team team) {
         mongo.save(team, TEAMS_COLLECTION);
     }
