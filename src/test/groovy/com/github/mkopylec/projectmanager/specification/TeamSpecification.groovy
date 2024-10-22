@@ -1,25 +1,42 @@
 package com.github.mkopylec.projectmanager.specification
 
 import com.github.mkopylec.projectmanager.BasicSpecification
+import com.github.mkopylec.projectmanager.application.dto.ExistingTeam
 import com.github.mkopylec.projectmanager.application.dto.NewTeam
 import com.github.mkopylec.projectmanager.application.dto.TeamMember
+import org.springframework.core.ParameterizedTypeReference
 import spock.lang.Unroll
 
 import static org.springframework.http.HttpStatus.CREATED
 import static org.springframework.http.HttpStatus.NOT_FOUND
+import static org.springframework.http.HttpStatus.OK
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 
 class TeamSpecification extends BasicSpecification {
 
-    def "Should create a new team"() {
+    def "Should create new team and browse it"() {
         given:
-        def newTeam = new NewTeam(name: 'Team 1')
+        def newTeam1 = new NewTeam(name: 'Team 1')
 
         when:
-        def response = post('/teams', newTeam)
+        def response = post('/teams', newTeam1)
 
         then:
         response.statusCode == CREATED
+
+        when:
+        response = get('/teams', new ParameterizedTypeReference<List<ExistingTeam>>() {})
+
+        then:
+        response.statusCode == OK
+        response.body != null
+        response.body.size() == 1
+        with(response.body[0]) {
+            name == 'Team 1'
+            currentlyImplementedProjects == 0
+            !busy
+            members == []
+        }
     }
 
     @Unroll
@@ -52,7 +69,7 @@ class TeamSpecification extends BasicSpecification {
     }
 
     @Unroll
-    def "Should add a new member with #jobPosition job position to a team"() {
+    def "Should add a new member with #jobPosition job position to a team and browse him"() {
         given:
         def newTeam = new NewTeam(name: 'Team 1')
         post('/teams', newTeam)
@@ -63,6 +80,21 @@ class TeamSpecification extends BasicSpecification {
 
         then:
         response.statusCode == CREATED
+
+        when:
+        response = get('/teams', new ParameterizedTypeReference<List<ExistingTeam>>() {})
+
+        then:
+        response.statusCode == OK
+        response.body != null
+        response.body.size() == 1
+        with(response.body[0]) {
+            members != null
+            members.size() == 1
+            members[0].firstName == 'Mariusz'
+            members[0].lastName == 'Kopylec'
+            members[0].jobPosition == jobPosition
+        }
 
         where:
         jobPosition << ['DEVELOPER', 'SCRUM_MASTER', 'PRODUCT_OWNER']
@@ -135,5 +167,14 @@ class TeamSpecification extends BasicSpecification {
         then:
         response.statusCode == NOT_FOUND
         response.body.code == 'NONEXISTENT_TEAM'
+    }
+
+    def "Should browse teams if none exists"() {
+        when:
+        def response = get('/teams', List)
+
+        then:
+        response.statusCode == OK
+        response.body == []
     }
 }
