@@ -1,41 +1,53 @@
 package com.github.mkopylec.projectmanager.specification
 
-import com.github.mkopylec.projectmanager.application.dto.ExistingTeam
 import com.github.mkopylec.projectmanager.application.dto.NewTeam
 import com.github.mkopylec.projectmanager.application.dto.TeamMember
 import com.github.mkopylec.projectmanager.common.Specification
-import org.springframework.core.ParameterizedTypeReference
+import com.github.mkopylec.projectmanager.project.utils.api.TeamHttpClient
+import com.github.mkopylec.projectmanager.project.utils.event.ProjectPublishedEvents
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
-import static org.springframework.http.HttpStatus.CREATED
-import static org.springframework.http.HttpStatus.NOT_FOUND
-import static org.springframework.http.HttpStatus.OK
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
+import static org.springframework.http.HttpStatus.*
 
 class TeamSpecification extends Specification {
 
+    @Autowired
+    protected TeamHttpClient team
+    @Autowired
+    protected ProjectPublishedEvents publishedEvents
+
+    @Override
+    void cleanup() {
+        publishedEvents.clear()
+    }
+
     def "Should create new team and browse it"() {
         given:
-        def newTeam1 = new NewTeam(name: 'Team 1')
+        def newTeam1 = new NewTeam(name: 'Team_1')
 
         when:
-        def response = post('/teams', newTeam1)
+        def response = team.createTeam(newTeam1)
 
         then:
-        response.statusCode == CREATED
+        with(response) {
+            status == CREATED
+        }
 
         when:
-        response = get('/teams', new ParameterizedTypeReference<List<ExistingTeam>>() {})
+        response = team.loadTeams()
 
         then:
-        response.statusCode == OK
-        response.body != null
-        response.body.size() == 1
-        with(response.body[0]) {
-            name == 'Team 1'
-            currentlyImplementedProjects == 0
-            !busy
-            members == []
+        with(response) {
+            status == OK
+            body != null
+            body.size() == 1
+            with(body[0]) {
+                name == 'Team_1'
+                currentlyImplementedProjects == 0
+                !busy
+                members == []
+            }
         }
     }
 
@@ -45,11 +57,15 @@ class TeamSpecification extends Specification {
         def newTeam = new NewTeam(name: name)
 
         when:
-        def response = post('/teams', newTeam)
+        def response = team.createTeam(newTeam)
 
         then:
-        response.statusCode == UNPROCESSABLE_ENTITY
-        response.body.code == 'EMPTY_TEAM_NAME'
+        with(response) {
+            status == UNPROCESSABLE_ENTITY
+            with(failure) {
+                code == 'EMPTY_TEAM_NAME'
+            }
+        }
 
         where:
         name << [null, '', '  ']
@@ -57,43 +73,53 @@ class TeamSpecification extends Specification {
 
     def "Should not create a team that already exists"() {
         given:
-        def newTeam = new NewTeam(name: 'Team 1')
-        post('/teams', newTeam)
+        def newTeam = new NewTeam(name: 'Team_1')
+        team.createTeam(newTeam)
 
         when:
-        def response = post('/teams', newTeam)
+        def response = team.createTeam(newTeam)
 
         then:
-        response.statusCode == UNPROCESSABLE_ENTITY
-        response.body.code == 'TEAM_ALREADY_EXISTS'
+        with(response) {
+            status == UNPROCESSABLE_ENTITY
+            with(failure) {
+                code == 'TEAM_ALREADY_EXISTS'
+            }
+        }
     }
 
     @Unroll
     def "Should add a new member with #jobPosition job position to a team and browse him"() {
         given:
-        def newTeam = new NewTeam(name: 'Team 1')
-        post('/teams', newTeam)
+        def newTeam = new NewTeam(name: 'Team_1')
+        team.createTeam(newTeam)
         def member = new TeamMember(firstName: 'Mariusz', lastName: 'Kopylec', jobPosition: jobPosition)
 
         when:
-        def response = post('/teams/Team 1/members', member)
+        def response = team.addMemberToTeam('Team_1', member)
 
         then:
-        response.statusCode == CREATED
+        with(response) {
+            status == CREATED
+        }
 
         when:
-        response = get('/teams', new ParameterizedTypeReference<List<ExistingTeam>>() {})
+        response = team.loadTeams()
 
         then:
-        response.statusCode == OK
-        response.body != null
-        response.body.size() == 1
-        with(response.body[0]) {
-            members != null
-            members.size() == 1
-            members[0].firstName == 'Mariusz'
-            members[0].lastName == 'Kopylec'
-            members[0].jobPosition == jobPosition
+        with(response) {
+            status == OK
+            body != null
+            body.size() == 1
+            with(body[0]) {
+                members != null
+                members.size() == 1
+                with(members[0]) {
+                    firstName == 'Mariusz'
+                    lastName == 'Kopylec'
+                    jobPosition == jobPosition
+                }
+            }
         }
 
         where:
@@ -103,16 +129,20 @@ class TeamSpecification extends Specification {
     @Unroll
     def "Should not add a new member without a first name to a team"() {
         given:
-        def newTeam = new NewTeam(name: 'Team 1')
-        post('/teams', newTeam)
+        def newTeam = new NewTeam(name: 'Team_1')
+        team.createTeam(newTeam)
         def member = new TeamMember(firstName: firstName, lastName: 'Kopylec', jobPosition: 'DEVELOPER')
 
         when:
-        def response = post('/teams/Team 1/members', member)
+        def response = team.addMemberToTeam('Team_1', member)
 
         then:
-        response.statusCode == UNPROCESSABLE_ENTITY
-        response.body.code == 'EMPTY_MEMBER_FIRST_NAME'
+        with(response) {
+            status == UNPROCESSABLE_ENTITY
+            with(failure) {
+                code == 'EMPTY_MEMBER_FIRST_NAME'
+            }
+        }
 
         where:
         firstName << [null, '', '  ']
@@ -121,16 +151,20 @@ class TeamSpecification extends Specification {
     @Unroll
     def "Should not add a new member without a last name to a team"() {
         given:
-        def newTeam = new NewTeam(name: 'Team 1')
-        post('/teams', newTeam)
+        def newTeam = new NewTeam(name: 'Team_1')
+        team.createTeam(newTeam)
         def member = new TeamMember(firstName: 'Mariusz', lastName: lastName, jobPosition: 'DEVELOPER')
 
         when:
-        def response = post('/teams/Team 1/members', member)
+        def response = team.addMemberToTeam('Team_1', member)
 
         then:
-        response.statusCode == UNPROCESSABLE_ENTITY
-        response.body.code == 'EMPTY_MEMBER_LAST_NAME'
+        with(response) {
+            status == UNPROCESSABLE_ENTITY
+            with(failure) {
+                code == 'EMPTY_MEMBER_LAST_NAME'
+            }
+        }
 
         where:
         lastName << [null, '', '  ']
@@ -138,16 +172,20 @@ class TeamSpecification extends Specification {
 
     def "Should not add a new member with #jobPosition job position to a team"() {
         given:
-        def newTeam = new NewTeam(name: 'Team 1')
-        post('/teams', newTeam)
+        def newTeam = new NewTeam(name: 'Team_1')
+        team.createTeam(newTeam)
         def member = new TeamMember(firstName: 'Mariusz', lastName: 'Kopylec', jobPosition: jobPosition)
 
         when:
-        def response = post('/teams/Team 1/members', member)
+        def response = team.addMemberToTeam('Team_1', member)
 
         then:
-        response.statusCode == UNPROCESSABLE_ENTITY
-        response.body.code == errorCode
+        with(response) {
+            status == UNPROCESSABLE_ENTITY
+            with(failure) {
+                code == errorCode
+            }
+        }
 
         where:
         jobPosition            | errorCode
@@ -162,19 +200,23 @@ class TeamSpecification extends Specification {
         def member = new TeamMember(firstName: 'Mariusz', lastName: 'Kopylec', jobPosition: 'DEVELOPER')
 
         when:
-        def response = post('/teams/Team 1/members', member)
+        def response = team.addMemberToTeam('Team_1', member)
 
         then:
-        response.statusCode == NOT_FOUND
-        response.body.code == 'NONEXISTENT_TEAM'
+        with(response) {
+            status == NOT_FOUND
+            with(failure) {
+                code == 'NONEXISTENT_TEAM'
+            }
+        }
     }
 
     def "Should browse teams if none exists"() {
         when:
-        def response = get('/teams', List)
+        def response = team.loadTeams()
 
         then:
-        response.statusCode == OK
+        response.status == OK
         response.body == []
     }
 }
