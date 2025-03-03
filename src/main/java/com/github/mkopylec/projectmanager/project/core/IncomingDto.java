@@ -155,6 +155,12 @@ public class IncomingDto {
         }
     }
 
+    public record NewTeam(String name) {
+    }
+
+    public record TeamMember(String firstName, String lastName, String jobPosition) {
+    }
+
     public enum CompletionStatus {
 
         TO_DO,

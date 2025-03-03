@@ -1,6 +1,7 @@
 package com.github.mkopylec.projectmanager.project.outbound.mongodb;
 
 import com.github.mkopylec.projectmanager.common.core.BusinessRuleViolation;
+import com.github.mkopylec.projectmanager.common.core.EventPublisher;
 import com.github.mkopylec.projectmanager.project.core.Project;
 import com.github.mkopylec.projectmanager.project.core.ProjectId;
 import com.github.mkopylec.projectmanager.project.core.ProjectRepository;

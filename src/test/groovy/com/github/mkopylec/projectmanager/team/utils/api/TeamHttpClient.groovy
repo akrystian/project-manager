@@ -1,17 +1,16 @@
-package com.github.mkopylec.projectmanager.project.utils.api
+package com.github.mkopylec.projectmanager.team.utils.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.mkopylec.projectmanager.application.dto.ExistingTeam
-import com.github.mkopylec.projectmanager.application.dto.NewTeam
-import com.github.mkopylec.projectmanager.application.dto.TeamMember
 import com.github.mkopylec.projectmanager.common.utils.api.HttpClient
 import com.github.mkopylec.projectmanager.common.utils.api.HttpRequest
 import com.github.mkopylec.projectmanager.common.utils.api.HttpResponse
 import com.github.mkopylec.projectmanager.common.utils.api.HttpResponseBodyReader
+import com.github.mkopylec.projectmanager.team.core.IncomingDto
+import com.github.mkopylec.projectmanager.team.core.OutgoingDto
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.stereotype.Component
 
-import static com.github.mkopylec.projectmanager.project.inbound.http.ResponseBodies.FailureBody
+import static com.github.mkopylec.projectmanager.team.inbound.http.ResponseBodies.FailureBody
 import static org.springframework.http.HttpMethod.GET
 import static org.springframework.http.HttpMethod.POST
 
@@ -24,7 +23,7 @@ class TeamHttpClient extends HttpClient {
         super(httpClient, bodyReader, mapper)
     }
 
-    HttpResponse<Void, FailureBody> createTeam(NewTeam body) {
+    HttpResponse<Void, FailureBody> createTeam(IncomingDto.NewTeam body) {
         def request = new HttpRequest()
             .setMethod(POST)
             .setUrl("$PROJECTS_CONTEXT_PATH")
@@ -32,14 +31,14 @@ class TeamHttpClient extends HttpClient {
         sendRequest(request, Void, FailureBody)
     }
 
-    HttpResponse<List<ExistingTeam>, FailureBody> loadTeams() {
+    HttpResponse<List<OutgoingDto.ExistingTeam>, FailureBody> loadTeams() {
         def request = new HttpRequest()
             .setMethod(GET)
             .setUrl("$PROJECTS_CONTEXT_PATH")
-        sendRequest(request, List<ExistingTeam>, FailureBody)
+        sendRequest(request, List<OutgoingDto.ExistingTeam>, FailureBody)
     }
 
-    HttpResponse<Void, FailureBody> addMemberToTeam(String teamName, TeamMember member) {
+    HttpResponse<Void, FailureBody> addMemberToTeam(String teamName, IncomingDto.TeamMember member) {
         def request = new HttpRequest()
             .setMethod(POST)
             .setUrl("$PROJECTS_CONTEXT_PATH/$teamName/members")

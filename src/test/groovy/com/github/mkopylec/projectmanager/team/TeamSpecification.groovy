@@ -1,30 +1,27 @@
-package com.github.mkopylec.projectmanager.specification
+package com.github.mkopylec.projectmanager.team
 
-import com.github.mkopylec.projectmanager.application.dto.NewTeam
-import com.github.mkopylec.projectmanager.application.dto.TeamMember
 import com.github.mkopylec.projectmanager.common.Specification
-import com.github.mkopylec.projectmanager.project.utils.api.TeamHttpClient
-import com.github.mkopylec.projectmanager.project.utils.event.ProjectPublishedEvents
+import com.github.mkopylec.projectmanager.team.core.IncomingDto
+import com.github.mkopylec.projectmanager.team.inbound.http.ResponseBodies
+import com.github.mkopylec.projectmanager.team.utils.api.TeamHttpClient
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
-import static org.springframework.http.HttpStatus.*
+import static org.springframework.http.HttpStatus.CONFLICT
+import static org.springframework.http.HttpStatus.CREATED
+import static org.springframework.http.HttpStatus.NOT_FOUND
+import static org.springframework.http.HttpStatus.OK
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 
 class TeamSpecification extends Specification {
 
     @Autowired
     protected TeamHttpClient team
-    @Autowired
-    protected ProjectPublishedEvents publishedEvents
 
-    @Override
-    void cleanup() {
-        publishedEvents.clear()
-    }
 
     def "Should create new team and browse it"() {
         given:
-        def newTeam1 = new NewTeam(name: 'Team_1')
+        def newTeam1 = new IncomingDto.NewTeam('Team_1')
 
         when:
         def response = team.createTeam(newTeam1)
@@ -54,7 +51,7 @@ class TeamSpecification extends Specification {
     @Unroll
     def "Should not create an unnamed new team"() {
         given:
-        def newTeam = new NewTeam(name: name)
+        def newTeam = new IncomingDto.NewTeam(name)
 
         when:
         def response = team.createTeam(newTeam)
@@ -63,7 +60,7 @@ class TeamSpecification extends Specification {
         with(response) {
             status == UNPROCESSABLE_ENTITY
             with(failure) {
-                code == 'EMPTY_TEAM_NAME'
+                code == ResponseBodies.FailureCodeBody.EMPTY_TEAM_NAME
             }
         }
 
@@ -73,7 +70,7 @@ class TeamSpecification extends Specification {
 
     def "Should not create a team that already exists"() {
         given:
-        def newTeam = new NewTeam(name: 'Team_1')
+        def newTeam = new IncomingDto.NewTeam('Team_1')
         team.createTeam(newTeam)
 
         when:
@@ -81,9 +78,9 @@ class TeamSpecification extends Specification {
 
         then:
         with(response) {
-            status == UNPROCESSABLE_ENTITY
+            status == CONFLICT
             with(failure) {
-                code == 'TEAM_ALREADY_EXISTS'
+                code == ResponseBodies.FailureCodeBody.CONCURRENT_TEAM_MODIFICATION
             }
         }
     }
@@ -91,9 +88,9 @@ class TeamSpecification extends Specification {
     @Unroll
     def "Should add a new member with #jobPosition job position to a team and browse him"() {
         given:
-        def newTeam = new NewTeam(name: 'Team_1')
+        def newTeam = new IncomingDto.NewTeam('Team_1')
         team.createTeam(newTeam)
-        def member = new TeamMember(firstName: 'Mariusz', lastName: 'Kopylec', jobPosition: jobPosition)
+        def member = new IncomingDto.TeamMember('Mariusz', 'Kopylec', jobPosition)
 
         when:
         def response = team.addMemberToTeam('Team_1', member)
@@ -114,6 +111,7 @@ class TeamSpecification extends Specification {
             with(body[0]) {
                 members != null
                 members.size() == 1
+
                 with(members[0]) {
                     firstName == 'Mariusz'
                     lastName == 'Kopylec'
@@ -123,15 +121,15 @@ class TeamSpecification extends Specification {
         }
 
         where:
-        jobPosition << ['DEVELOPER', 'SCRUM_MASTER', 'PRODUCT_OWNER']
+        jobPosition << ['SOFTWARE_DEVELOPER', 'SCRUM_MASTER', 'PRODUCT_OWNER']
     }
 
     @Unroll
     def "Should not add a new member without a first name to a team"() {
         given:
-        def newTeam = new NewTeam(name: 'Team_1')
+        def newTeam = new IncomingDto.NewTeam('Team_1')
         team.createTeam(newTeam)
-        def member = new TeamMember(firstName: firstName, lastName: 'Kopylec', jobPosition: 'DEVELOPER')
+        def member = new IncomingDto.TeamMember(firstName, 'Kopylec', 'DEVELOPER')
 
         when:
         def response = team.addMemberToTeam('Team_1', member)
@@ -140,7 +138,7 @@ class TeamSpecification extends Specification {
         with(response) {
             status == UNPROCESSABLE_ENTITY
             with(failure) {
-                code == 'EMPTY_MEMBER_FIRST_NAME'
+                code == ResponseBodies.FailureCodeBody.EMPTY_MEMBER_FIRST_NAME
             }
         }
 
@@ -151,9 +149,9 @@ class TeamSpecification extends Specification {
     @Unroll
     def "Should not add a new member without a last name to a team"() {
         given:
-        def newTeam = new NewTeam(name: 'Team_1')
+        def newTeam = new IncomingDto.NewTeam('Team_1')
         team.createTeam(newTeam)
-        def member = new TeamMember(firstName: 'Mariusz', lastName: lastName, jobPosition: 'DEVELOPER')
+        def member = new IncomingDto.TeamMember('Mariusz', lastName, 'DEVELOPER')
 
         when:
         def response = team.addMemberToTeam('Team_1', member)
@@ -162,7 +160,7 @@ class TeamSpecification extends Specification {
         with(response) {
             status == UNPROCESSABLE_ENTITY
             with(failure) {
-                code == 'EMPTY_MEMBER_LAST_NAME'
+                code == ResponseBodies.FailureCodeBody.EMPTY_MEMBER_LAST_NAME
             }
         }
 
@@ -172,9 +170,9 @@ class TeamSpecification extends Specification {
 
     def "Should not add a new member with #jobPosition job position to a team"() {
         given:
-        def newTeam = new NewTeam(name: 'Team_1')
+        def newTeam = new IncomingDto.NewTeam('Team_1')
         team.createTeam(newTeam)
-        def member = new TeamMember(firstName: 'Mariusz', lastName: 'Kopylec', jobPosition: jobPosition)
+        def member = new IncomingDto.TeamMember('Mariusz', 'Kopylec', jobPosition)
 
         when:
         def response = team.addMemberToTeam('Team_1', member)
@@ -189,15 +187,15 @@ class TeamSpecification extends Specification {
 
         where:
         jobPosition            | errorCode
-        null                   | 'EMPTY_MEMBER_JOB_POSITION'
-        ''                     | 'EMPTY_MEMBER_JOB_POSITION'
-        '  '                   | 'EMPTY_MEMBER_JOB_POSITION'
-        'INVALID_JOB_POSITION' | 'INVALID_MEMBER_JOB_POSITION'
+        null                   | ResponseBodies.FailureCodeBody.EMPTY_MEMBER_JOB_POSITION
+        ''                     | ResponseBodies.FailureCodeBody.EMPTY_MEMBER_JOB_POSITION
+        '  '                   | ResponseBodies.FailureCodeBody.EMPTY_MEMBER_JOB_POSITION
+        'INVALID_JOB_POSITION' | ResponseBodies.FailureCodeBody.INVALID_MEMBER_JOB_POSITION
     }
 
     def "Should not add a new member to a nonexistent team"() {
         given:
-        def member = new TeamMember(firstName: 'Mariusz', lastName: 'Kopylec', jobPosition: 'DEVELOPER')
+        def member = new IncomingDto.TeamMember('Mariusz', 'Kopylec', 'DEVELOPER')
 
         when:
         def response = team.addMemberToTeam('Team_1', member)
@@ -206,7 +204,7 @@ class TeamSpecification extends Specification {
         with(response) {
             status == NOT_FOUND
             with(failure) {
-                code == 'NONEXISTENT_TEAM'
+                code == ResponseBodies.FailureCodeBody.NONEXISTENT_TEAM
             }
         }
     }

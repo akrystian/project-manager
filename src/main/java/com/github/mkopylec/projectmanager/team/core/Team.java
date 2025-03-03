@@ -25,6 +25,10 @@ public class Team extends Aggregate<TeamName> {
         setMembers(members);
     }
 
+    public Team(TeamName name) {
+        this(name, new AggregateStateVersion(), new BusyTeamThreshold(), new TeamCurrentlyImplementedProjects(), emptyList());
+    }
+
     Team(TeamName name, BusyTeamThreshold busyThreshold) {
         this(name, new AggregateStateVersion(), busyThreshold, new TeamCurrentlyImplementedProjects(), emptyList());
     }

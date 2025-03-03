@@ -34,4 +34,5 @@ public abstract class ProjectRepository extends AggregateRepository<Project, Pro
             super(properties("id", id));
         }
     }
+
 }

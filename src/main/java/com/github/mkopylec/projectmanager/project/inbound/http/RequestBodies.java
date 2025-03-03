@@ -1,5 +1,8 @@
 package com.github.mkopylec.projectmanager.project.inbound.http;
 
+import com.github.mkopylec.projectmanager.project.core.IncomingDto;
+import com.github.mkopylec.projectmanager.project.core.IncomingDto.NewTeam;
+
 import java.util.List;
 import java.util.UUID;
 
