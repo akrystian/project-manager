@@ -67,8 +67,8 @@ class ProjectEndSpecification extends ProjectSpecification {
             }
         }
 
-// TODO in team module tests
-//  with(get('/teams', new ParameterizedTypeReference<List<ExistingTeam>>() {}).body[0]) {
+ //TODO in team module tests
+//        with(get('/teams', new ParameterizedTypeReference<List<ExistingTeam>>() {}).body[0]) {
 //            name == 'Team 1'
 //            currentlyImplementedProjects == 0
 //        }

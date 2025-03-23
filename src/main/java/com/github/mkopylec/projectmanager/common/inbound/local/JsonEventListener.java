@@ -23,7 +23,7 @@ class JsonEventListener {
 
     @Async
     @EventListener(condition = "#event.contains(\"com.github.mkopylec.projectmanager.common.outbound.local.JsonEvent\")")
-    private void listen(String event) { // TODO Can be private?
+    private void listen(String event) {
         try {
             var jsonEvent = jsonMapper.readValue(event, JsonEvent.class);
             for (var handler : eventHandlers) {

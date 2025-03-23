@@ -15,7 +15,7 @@ abstract class PublishedEvents {
     }
 
     @EventListener(condition = '#event.contains("com.github.mkopylec.projectmanager.common.outbound.local.JsonEvent")')
-    private void handle(String event) { // TODO Private?
+    private void handle(String event) {
         def jsonEvent = jsonMapper.readValue(event, JsonEvent)
         def type = allowedTypes.find { it.simpleName == jsonEvent.type }
         if (type) {
