@@ -1,6 +1,6 @@
-package com.github.mkopylec.projectmanager.infrastructure.services;
+package com.github.mkopylec.projectmanager.common.core;
 
-import com.github.mkopylec.projectmanager.domain.services.UniqueIdentifierGenerator;
+import com.github.mkopylec.projectmanager.common.core.UniqueIdentifierGenerator;
 import org.springframework.stereotype.Service;
 
 import static java.util.UUID.randomUUID;

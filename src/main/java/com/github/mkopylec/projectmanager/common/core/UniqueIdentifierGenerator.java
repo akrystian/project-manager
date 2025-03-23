@@ -1,4 +1,4 @@
-package com.github.mkopylec.projectmanager.domain.services;
+package com.github.mkopylec.projectmanager.common.core;
 
 public interface UniqueIdentifierGenerator {
 
