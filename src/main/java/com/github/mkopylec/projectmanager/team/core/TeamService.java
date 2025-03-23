@@ -6,7 +6,6 @@ import com.github.mkopylec.projectmanager.team.core.OutgoingDto.ExistingTeam;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TeamService {
@@ -31,6 +30,16 @@ public class TeamService {
     public List<ExistingTeam> getTeams() {
         try {
             return repository.findAll().stream().map(ExistingTeam::new).toList();
+        } catch (TeamBusinessRuleViolation violation) {
+            throw new TeamsNotLoaded(violation);
+        }
+    }
+
+    public void addCurrentlyImplementedProjectToTeam(IncomingDto.TeamName teamName) {
+        try {
+            var team = repository.require(new TeamName(teamName.name()));
+            team.addCurrentlyImplementedProject();
+            repository.save(team, eventPublisher);
         } catch (TeamBusinessRuleViolation violation) {
             throw new TeamsNotLoaded(violation);
         }
