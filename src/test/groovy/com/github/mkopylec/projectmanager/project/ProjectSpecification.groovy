@@ -9,6 +9,7 @@ abstract class ProjectSpecification extends Specification {
 
     @Autowired
     protected ProjectHttpClient projects
+
     @Autowired
     protected ProjectPublishedEvents publishedEvents
 

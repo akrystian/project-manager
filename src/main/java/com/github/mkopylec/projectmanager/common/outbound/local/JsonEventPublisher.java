@@ -23,6 +23,8 @@ class JsonEventPublisher extends EventPublisher {
         this.eventConverters = eventConverters;
     }
 
+    // todo persist in db
+
     @Override
     protected void publish(Event event) {
         var payload = eventConverters.stream()

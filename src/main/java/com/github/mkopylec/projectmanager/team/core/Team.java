@@ -61,7 +61,7 @@ public class Team extends Aggregate<TeamName> {
         currentlyImplementedProjects = currentlyImplementedProjects.removeProject();
     }
 
-    void addMember(Member member) { // TODO Scheduler that updates members using some HTTP outbound adapter
+    void addMember(Member member) {
         if (member != null) {
             members.add(member);
         }
