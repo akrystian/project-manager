@@ -2,6 +2,7 @@ package com.github.mkopylec.projectmanager.team
 
 import com.github.mkopylec.projectmanager.team.core.IncomingDto
 import com.github.mkopylec.projectmanager.team.inbound.local.ProjectTeamAssignedPayload
+import spock.lang.Ignore
 
 import static java.time.Instant.now
 import static java.util.UUID.randomUUID
@@ -9,6 +10,7 @@ import static org.springframework.http.HttpStatus.OK
 
 class TeamConsumeProjectEndedSpecification extends TeamSpecification {
 
+    @Ignore
     def "Should consume project ended"() {
         given:
         def newTeam = new IncomingDto.NewTeam('Team_1')

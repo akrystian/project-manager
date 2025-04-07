@@ -1,7 +1,7 @@
 package com.github.mkopylec.projectmanager.team.inbound.http;
 
-import com.github.mkopylec.projectmanager.project.core.IncomingDto.NewTeam;
 import com.github.mkopylec.projectmanager.team.core.IncomingDto;
+import com.github.mkopylec.projectmanager.team.core.IncomingDto.NewTeam;
 import com.github.mkopylec.projectmanager.team.core.OutgoingDto;
 import com.github.mkopylec.projectmanager.team.core.TeamService;
 import org.springframework.web.bind.annotation.GetMapping;

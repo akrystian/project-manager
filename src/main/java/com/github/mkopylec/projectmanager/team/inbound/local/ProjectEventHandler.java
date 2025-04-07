@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mkopylec.projectmanager.common.inbound.local.EventHandler;
 import com.github.mkopylec.projectmanager.common.inbound.local.JsonEventPayload;
-import com.github.mkopylec.projectmanager.project.core.ProjectTeamAssigned;
 import com.github.mkopylec.projectmanager.team.core.IncomingDto;
 import com.github.mkopylec.projectmanager.team.core.TeamService;
 import org.springframework.stereotype.Component;
@@ -15,10 +14,11 @@ import java.util.UUID;
 
 @Component
 public class ProjectEventHandler extends EventHandler<ProjectTeamAssignedPayload> {
+    private static final String HANDLED_EVENT_CLASS_NAME = "ProjectTeamAssigned";
     private final TeamService service;
 
     protected ProjectEventHandler(TeamService teamService, ObjectMapper jsonMapper) {
-        super(ProjectTeamAssigned.class.getSimpleName(), ProjectTeamAssignedPayload.class, jsonMapper);
+        super(HANDLED_EVENT_CLASS_NAME, ProjectTeamAssignedPayload.class, jsonMapper);
         this.service = teamService;
     }
 

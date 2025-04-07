@@ -1,7 +1,7 @@
 package com.github.mkopylec.projectmanager.team.core;
 
 import com.github.mkopylec.projectmanager.common.core.EventPublisher;
-import com.github.mkopylec.projectmanager.project.core.IncomingDto.NewTeam;
+import com.github.mkopylec.projectmanager.team.core.IncomingDto.NewTeam;
 import com.github.mkopylec.projectmanager.team.core.OutgoingDto.ExistingTeam;
 import org.springframework.stereotype.Service;
 
