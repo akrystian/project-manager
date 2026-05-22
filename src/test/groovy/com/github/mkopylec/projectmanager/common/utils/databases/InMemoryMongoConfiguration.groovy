@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.MongoOperations
@@ -75,22 +74,25 @@ class InMemoryMongoConfiguration {
     }
 
     protected static String collectionName(Class<?> type) {
+        // Keep this aligned with @Document mapping used in document classes.
         def document = type.getAnnotation(Document)
         if (document == null) {
-            return type.simpleName
+            return defaultCollectionName(type)
         }
 
         def fromCollection = document.collection()
         if (fromCollection != null && !fromCollection.isBlank()) {
             return fromCollection
         }
-
         def fromValue = document.value()
-        return fromValue == null || fromValue.isBlank() ? type.simpleName : fromValue
+        return fromValue == null || fromValue.isBlank() ? defaultCollectionName(type) : fromValue
     }
 
     protected static Object readId(Object object) {
-        def field = findField(object.class) { it.isAnnotationPresent(MongoId) } ?: findField(object.class) { it.name == 'id' || it.name == 'name' }
+        def field = findField(object.class) { it.isAnnotationPresent(MongoId) } ?: findField(object.class) { it.name == 'id' }
+        if (field == null) {
+            throw new IllegalStateException("No @MongoId or id field found for ${object.class.name}")
+        }
         field.accessible = true
         field.get(object)
     }
@@ -101,20 +103,20 @@ class InMemoryMongoConfiguration {
             return
         }
         versionField.accessible = true
-        def currentVersion = currentDocument == null ? null : versionField.get(currentDocument) as Integer
-        def incomingVersion = versionField.get(document) as Integer
-        if (currentDocument != null && incomingVersion == null) {
-            throw new DuplicateKeyException('Duplicate key')
+        def currentVersion = currentDocument == null ? null : versionField.get(currentDocument) as Number
+        def incomingVersion = versionField.get(document) as Number
+        if (currentDocument != null && incomingVersion == null && currentVersion != null) {
+            throw new OptimisticLockingFailureException("Version mismatch for ${document.class.simpleName} id=${readId(document)}")
         }
         if (currentDocument != null && incomingVersion != currentVersion) {
-            throw new OptimisticLockingFailureException('Version mismatch')
+            throw new OptimisticLockingFailureException("Version mismatch for ${document.class.simpleName} id=${readId(document)}")
         }
-        versionField.set(document, currentVersion == null ? 0 : currentVersion + 1)
+        versionField.set(document, currentVersion == null ? 0 : currentVersion.intValue() + 1)
     }
 
     protected static java.lang.reflect.Field findField(Class<?> type, Closure<Boolean> matcher) {
         Class<?> current = type
-        while (current != null && current != Object) {
+        while (current != null && current != Object.class) {
             def field = current.declaredFields.find(matcher)
             if (field != null) {
                 return field
@@ -122,5 +124,10 @@ class InMemoryMongoConfiguration {
             current = current.superclass
         }
         return null
+    }
+
+    private static String defaultCollectionName(Class<?> type) {
+        def simpleName = type.simpleName
+        simpleName.substring(0, 1).toLowerCase() + simpleName.substring(1)
     }
 }
