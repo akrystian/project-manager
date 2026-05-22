@@ -2,6 +2,7 @@ package com.github.mkopylec.projectmanager.project.inbound.http;
 
 import com.github.mkopylec.projectmanager.common.inbound.http.FailureResponseHandler;
 import com.github.mkopylec.projectmanager.project.core.ProjectUseCaseViolation;
+import com.github.mkopylec.projectmanager.team.inbound.http.TeamController;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackageClasses = ProjectController.class)
 class FailureHandler extends FailureResponseHandler {
 
     @ExceptionHandler(ProjectUseCaseViolation.class)

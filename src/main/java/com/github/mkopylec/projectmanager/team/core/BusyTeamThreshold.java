@@ -10,6 +10,10 @@ public class BusyTeamThreshold extends Value<Integer> {
 
     private static final int DEFAULT = 1;
 
+
+    BusyTeamThreshold() {
+        this(DEFAULT);
+    }
     BusyTeamThreshold(Integer value) {
         super(value != null ? max(value, DEFAULT) : null);
     }

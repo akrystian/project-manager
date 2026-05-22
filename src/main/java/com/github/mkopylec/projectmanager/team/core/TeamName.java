@@ -1,5 +1,6 @@
 package com.github.mkopylec.projectmanager.team.core;
 
+import com.github.mkopylec.projectmanager.common.core.BusinessRuleViolation;
 import com.github.mkopylec.projectmanager.common.core.Value;
 
 import static com.github.mkopylec.projectmanager.common.core.BusinessRuleViolation.requireNoBusinessRuleViolation;
@@ -8,7 +9,7 @@ import static com.github.mkopylec.projectmanager.common.support.StringUtils.isBl
 
 public class TeamName extends Value<String> {
 
-    TeamName(String value) {
+    public TeamName(String value) {
         super(value);
         if (isBlank(value)) {
             throw new InvalidTeamName(value);
@@ -19,7 +20,7 @@ public class TeamName extends Value<String> {
         return requireNoBusinessRuleViolation(() -> new TeamName(value));
     }
 
-    static final class InvalidTeamName extends TeamBusinessRuleViolation {
+    public static final class InvalidTeamName extends TeamBusinessRuleViolation {
 
         private InvalidTeamName(String name) {
             super(properties("name", name));

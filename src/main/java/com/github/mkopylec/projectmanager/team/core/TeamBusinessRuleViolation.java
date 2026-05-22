@@ -9,8 +9,9 @@ import static com.github.mkopylec.projectmanager.team.core.MemberFirstName.Inval
 import static com.github.mkopylec.projectmanager.team.core.MemberLastName.InvalidEmployeeLastName;
 import static com.github.mkopylec.projectmanager.team.core.TeamCurrentlyImplementedProjects.InvalidTeamCurrentlyImplementedProjects;
 import static com.github.mkopylec.projectmanager.team.core.TeamName.InvalidTeamName;
+import static com.github.mkopylec.projectmanager.team.core.TeamRepository.ConcurrentTeamModification;
 
-abstract sealed class TeamBusinessRuleViolation extends BusinessRuleViolation permits InvalidBusyTeamThreshold, InvalidJobPosition, InvalidEmployeeFirstName, InvalidEmployeeLastName, InvalidTeamCurrentlyImplementedProjects, InvalidTeamName {
+abstract sealed class TeamBusinessRuleViolation extends BusinessRuleViolation permits InvalidBusyTeamThreshold, JobPosition.EmptyJobPosition, InvalidJobPosition, InvalidEmployeeFirstName, InvalidEmployeeLastName, InvalidTeamCurrentlyImplementedProjects, InvalidTeamName, ConcurrentTeamModification, TeamRepository.NoTeamExists, TeamRepository.TeamAlreadyExists {
 
     TeamBusinessRuleViolation(BusinessRuleViolationProperties properties) {
         super(properties);

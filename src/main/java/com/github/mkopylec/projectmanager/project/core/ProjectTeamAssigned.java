@@ -9,7 +9,7 @@ public class ProjectTeamAssigned extends Event {
     private final ProjectId projectId;
     private final TeamAssignedToProject assignedTeam;
 
-    ProjectTeamAssigned(ProjectId projectId, TeamAssignedToProject assignedTeam, Clock clock) {
+    public ProjectTeamAssigned(ProjectId projectId, TeamAssignedToProject assignedTeam, Clock clock) {
         super(clock);
         this.projectId = projectId;
         this.assignedTeam = assignedTeam;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.mkopylec.projectmanager.common.inbound.http.FailureResponseBody;
 import com.github.mkopylec.projectmanager.common.inbound.http.FailureResponseBody.FailureCodeResponseBody;
+import com.github.mkopylec.projectmanager.project.core.OutgoingDto;
 import com.github.mkopylec.projectmanager.project.core.OutgoingDto.ExistingProjectDraft;
 import com.github.mkopylec.projectmanager.project.core.ProjectUseCaseViolation;
 
@@ -33,7 +34,8 @@ public class ResponseBodies {
 
     }
 
-    public record ExistingProjectBody(UUID id, String name, CompletionStatusBody status, String team, List<ExistingFeatureBody> features) {
+    public record ExistingProjectBody(UUID id, String name, CompletionStatusBody status, String team,
+                                      List<ExistingFeatureBody> features) {
 
         ExistingProjectBody(ExistingProject project) {
             this(project.getId(), project.getName(), completionStatusBody(project.getStatus()), project.getTeam(), project.getFeatures().stream().map(ExistingFeatureBody::new).toList());
@@ -46,6 +48,7 @@ public class ResponseBodies {
             this(feature.getName(), completionStatusBody(feature.getStatus()), featureRequirementBody(feature.getRequirement()));
         }
     }
+
 
     public enum CompletionStatusBody {
 

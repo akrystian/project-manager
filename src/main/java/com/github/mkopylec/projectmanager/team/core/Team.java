@@ -25,6 +25,10 @@ public class Team extends Aggregate<TeamName> {
         setMembers(members);
     }
 
+    public Team(TeamName name) {
+        this(name, new AggregateStateVersion(), new BusyTeamThreshold(), new TeamCurrentlyImplementedProjects(), emptyList());
+    }
+
     Team(TeamName name, BusyTeamThreshold busyThreshold) {
         this(name, new AggregateStateVersion(), busyThreshold, new TeamCurrentlyImplementedProjects(), emptyList());
     }
@@ -57,7 +61,7 @@ public class Team extends Aggregate<TeamName> {
         currentlyImplementedProjects = currentlyImplementedProjects.removeProject();
     }
 
-    void addMember(Member member) { // TODO Scheduler that updates members using some HTTP outbound adapter
+    void addMember(Member member) {
         if (member != null) {
             members.add(member);
         }

@@ -16,13 +16,8 @@ import static java.util.Collections.unmodifiableList;
 
 public class IncomingDto {
 
-    public static class ProjectId {
 
-        private final UUID value;
-
-        public ProjectId(UUID value) {
-            this.value = value;
-        }
+    public record ProjectId(UUID value) {
 
         com.github.mkopylec.projectmanager.project.core.ProjectId getProjectId() {
             return new com.github.mkopylec.projectmanager.project.core.ProjectId(value);
@@ -153,6 +148,12 @@ public class IncomingDto {
         ProjectEndingFeaturesPolicy getProjectEndingFeaturesPolicy() {
             return condition.getProjectEndingFeaturesPolicy();
         }
+    }
+
+    public record NewTeam(String name) {
+    }
+
+    public record TeamMember(String firstName, String lastName, String jobPosition) {
     }
 
     public enum CompletionStatus {
